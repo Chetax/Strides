@@ -1,0 +1,51 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+
+# Environment variable files
+.env
+.env.*
+
+# Streamlit's generated folder
+.streamlit/config.toml
+.streamlit/secrets.toml
+
+# Jupyter Notebook checkpoints (in case you use them)
+.ipynb_checkpoints
+
+# Pytest cache
+.pytest_cache/
+
+# VSCode settings (if you're using VSCode)
+.vscode/
+
+# macOS files
+.DS_Store
+
+# Logs
+*.log
+
+# Compiled Cython files
+*.c
+*.so
+
+# Build files
+build/
+dist/
+*.egg-info/
+
+# mypy
+.mypy_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# PyInstaller
+*.spec
