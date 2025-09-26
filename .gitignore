@@ -49,3 +49,9 @@ htmlcov/
 
 # PyInstaller
 *.spec
+
+# creadential of google cloud api
+credentials.json
+#auth file generate after signup
+token.json
+#

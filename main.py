@@ -1,6 +1,7 @@
 import streamlit as st
-from applications import get_random_quotes ,get_weather_report_using_gemini
+from applications import get_random_quotes ,get_weather_report_using_gemini ,fetch_and_format_calendar_events,get_daily_summary
 import random 
+from streamlit_calendar import calendar
 
 def get_random_image(): 
  image_urls = [
@@ -42,7 +43,42 @@ def weather_page():
           st.success("Weather fethced successfuly ✅ !`")
 
 
-# Sitebar Navigations
+def smart_planner():
+   st.title("Welcome to Smart Planner 🗓️")
+   st.markdown("---")
+    
+   with st.spinner('Fetching and optimizing schedule...'):
+            st_events = fetch_and_format_calendar_events()
+
+            st.subheader("Google Calendar Events")
+            
+            calendar_options = {
+                "initialView": "dayGridWeek",
+                "headerToolbar": {
+                    "left": "today prev,next",
+                    "center": "title",
+                    "right": "dayGridMonth,timeGridWeek,timeGridDay",
+                },
+                "editable": False,
+                "height": 650
+            }
+               
+            if st_events and st.button("Summarize My Day & Plan Free Time", key="summarize_btn"):
+             with st.spinner("Asking Gemini to analyze your schedule..."): 
+                  daily_summary_text = get_daily_summary(st_events)
+                  st.session_state['daily_summary'] = daily_summary_text
+  
+            calendar_result = calendar(
+                    events=st_events,
+                    options=calendar_options,
+                    key="google_calendar"
+                )
+            if 'daily_summary' in st.session_state:
+             st.subheader("🤖 Gemini Daily Insight")
+             st.info(st.session_state['daily_summary'])
+            
+
+
 
 st.sidebar.title("Navigations")
 st.sidebar.markdown('---')
@@ -54,4 +90,4 @@ if page_option=="Home":
 elif page_option=="Weather of your City":
     weather_page()
 elif page_option=="Smart Planner":
-    st.title("Welcome to Smart Planner page")
+    smart_planner()
