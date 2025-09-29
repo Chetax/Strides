@@ -31,11 +31,11 @@ def prompt_for_quote():
 
 
 def get_random_quotes():
-    # response=client.models.generate_content(
-    #     model="gemini-2.5-flash-lite",
-    #     contents=[prompt_for_quote()],
-    # )
-    return "response.text"
+    response=client.models.generate_content(
+        model="gemini-2.5-flash-lite",
+        contents=[prompt_for_quote()],
+    )
+    return response.text
 
 
 def get_weather_info(city: str):
