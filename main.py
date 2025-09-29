@@ -2,6 +2,13 @@ import streamlit as st
 from applications import get_random_quotes ,get_weather_report_using_gemini ,fetch_and_format_calendar_events,get_daily_summary
 import random 
 from streamlit_calendar import calendar
+from profile_setup import show_persona_setup_form
+
+
+if 'generating_summary' not in st.session_state:
+    st.session_state['generating_summary'] = False
+if 'reset_button_click' not in st.session_state:
+   st.session_state.reset_button_click=False
 
 def get_random_image(): 
  image_urls = [
@@ -29,6 +36,9 @@ def home_page():
        st.session_state.random_image=get_random_image()
     st.image(st.session_state.random_image,caption="A Beautiful Morning to start your day",use_container_width=True)
     st.markdown("---")
+    if "persona_submitted" not in st.session_state:
+      show_persona_setup_form(1)
+      return
     st.info("use the sidebar on the left to get your daily updates")
 
 
@@ -40,43 +50,73 @@ def weather_page():
         with st.spinner("Fetching your city weather info..."):
           city_weatherInfo_key=get_weather_report_using_gemini(city)
           st.subheader(f"Weather Info:{city_weatherInfo_key}")
-          st.success("Weather fethced successfuly ✅ !`")
 
+
+def generate_summary_and_rerun():
+    """Fetches summary, saves to state, and forces a rerun."""
+    with st.spinner("Asking Gemini to analyze your schedule..."): 
+        st_events = st.session_state.st_events
+        persona_data = st.session_state.persona_data
+        
+        daily_summary_text = get_daily_summary(st_events, persona_data)
+        st.session_state['daily_summary'] = daily_summary_text
+        st.rerun() 
 
 def smart_planner():
-   st.title("Welcome to Smart Planner 🗓️")
-   st.markdown("---")
+    st.title("Welcome to Smart Planner 🗓️")
+    st.markdown("---")
     
-   with st.spinner('Fetching and optimizing schedule...'):
-            st_events = fetch_and_format_calendar_events()
 
-            st.subheader("Google Calendar Events")
+    if st.session_state.get("persona_submitted") is not True:
+        st.warning("Please complete your Personal Context setup on the Home page first to enable smart suggestions.")
+        return
+   
+
+    if "st_events" not in st.session_state:
+        with st.spinner('Fetching schedule...'):
+            st.session_state.st_events = fetch_and_format_calendar_events()
+
+    if 'daily_summary' not in st.session_state:
+        
+        if st.session_state.st_events and (st.button("Summarize My Day & Plan Free Time", key="summarize_btn") or st.session_state.reset_button_click):
+            generate_summary_and_rerun()
+            st.session_state.reset_button_click=False
+        elif not st.session_state.st_events:
+             st.info("No upcoming events found. Cannot generate a summary.")
+    
+   
+    st.subheader("Google Calendar Events")
             
-            calendar_options = {
-                "initialView": "dayGridWeek",
-                "headerToolbar": {
-                    "left": "today prev,next",
-                    "center": "title",
-                    "right": "dayGridMonth,timeGridWeek,timeGridDay",
-                },
-                "editable": False,
-                "height": 650
-            }
-               
-            if st_events and st.button("Summarize My Day & Plan Free Time", key="summarize_btn"):
-             with st.spinner("Asking Gemini to analyze your schedule..."): 
-                  daily_summary_text = get_daily_summary(st_events)
-                  st.session_state['daily_summary'] = daily_summary_text
-  
-            calendar_result = calendar(
-                    events=st_events,
-                    options=calendar_options,
-                    key="google_calendar"
-                )
-            if 'daily_summary' in st.session_state:
-             st.subheader("🤖 Gemini Daily Insight")
-             st.info(st.session_state['daily_summary'])
+    calendar_options = {
+        "initialView": "timeGridDay",
+        "headerToolbar": {
+            "left": "today prev,next",
+            "center": "title",
+            "right": "dayGridMonth,timeGridWeek,timeGridDay",
+        },
+        "editable": False,
+        "height": 650
+    }
+    
+
+    calendar_result = calendar(
+        events=st.session_state.st_events,
+        options=calendar_options,
+        key="google_calendar"
+    )  
             
+    
+    if 'daily_summary' in st.session_state:
+        st.subheader("🤖 Gemini Daily Insight")
+        col_insight, col_button = st.columns([0.9, 0.1])
+        col_insight.info(st.session_state['daily_summary'])
+
+        if col_button.button('Reset',key="reset_summary",help="generate a new summary immediately."):
+           st.session_state.reset_button_click=True
+           del st.session_state.daily_summary
+       
+        
+      
 
 
 

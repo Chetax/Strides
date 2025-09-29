@@ -31,11 +31,11 @@ def prompt_for_quote():
 
 
 def get_random_quotes():
-    response=client.models.generate_content(
-        model="gemini-2.5-flash-lite",
-        contents=[prompt_for_quote()],
-    )
-    return response.text
+    # response=client.models.generate_content(
+    #     model="gemini-2.5-flash-lite",
+    #     contents=[prompt_for_quote()],
+    # )
+    return "response.text"
 
 
 def get_weather_info(city: str):
@@ -143,7 +143,7 @@ def fetch_and_format_calendar_events():
         st.error(f"Authentication Error: {e}. Please ensure credentials.json and token.json are present and valid.")
         return []
 
-def get_daily_summary(events: list):
+def get_daily_summary(events: list,persona_data):
     """
     Uses Gemini to summarize the day's plan, free time, and suggestions.
     """
@@ -175,10 +175,10 @@ def get_daily_summary(events: list):
 Analyze the following schedule for today ({today.strftime('%A, %B %d')}) and provide a comprehensive summary and plan.
 
 **My Personal Context:**
-*   **Weekly Routine:** I typically work from the office from Monday to Friday and am at home on weekends.
-*   **Current Goals:** [List your current short-term and long-term goals, e.g., "Prepare for the Azure AZ-104 certification," "Improve my Python skills for a new project," "Maintain a consistent fitness routine."]
-*   **Productivity Style:** [Describe your work style, e.g., "I am most productive in the morning," "I prefer working in 90-minute blocks," "Meetings drain my energy."]
-*   **Interests:** [List your hobbies and interests, e.g., "AI/ML, web development, reading about personal finance, playing the guitar."]
+*   **Weekly Routine:** { st.session_state.persona_data["routine"]}.
+*   **Current Goals:** [{ st.session_state.persona_data["goals"]}]
+*   **Productivity Style:** [{ st.session_state.persona_data["productivity_style"]}]
+*   **Interests:** [{ st.session_state.persona_data["interests"]}]
 
 **Today's Planned Schedule (Events and Times):**
 {event_list_string if event_list_string else "No timed events found on the calendar."}
